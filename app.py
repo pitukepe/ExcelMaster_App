@@ -233,6 +233,11 @@ class App:
             elif self.output_choice.get() == ".sqlite":
                 self.sqlite_convert(cleaned_file_path, self.tablename.get(), df)
 
+
+
+#### GUI ####
 gui = tk.Tk()
+#### App ####
 app = App(gui)
+#### App Main Loop ####
 app.master.mainloop()
