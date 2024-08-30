@@ -318,26 +318,55 @@ class App:
                 data = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get())
                 self.sheet_label.config(fg="#5ea832")
                 self.sheet_label.config(text="Data Sheet name:")
-            except ValueError:
+            except Exception:
                 messagebox.showerror("Error", "Please choose a valid sheet name!")
                 self.sheet_label.config(fg="red")
                 self.sheet_label.config(text="* Data Sheet name:")
                 return
             
-        
-            try:
-                pivot_table_df = pd.pivot_table(data, index=self.index_choice.get(), values=self.value_choice.get(), aggfunc=self.agg_choice.get())
-                self.index_label.config(fg="#5ea832")
-                self.index_label.config(text="Pivot index column:")
-                self.value_label.config(fg="#5ea832")
-                self.value_label.config(text="Pivot values column:")
-            except Exception:
-                messagebox.showerror("Error", "Error geting the index or column name!")
-                self.index_label.config(fg="red")
-                self.index_label.config(text="* Pivot index column:")
+            ###trying if the self.value_choice.get() is a column with integers
+            if self.value_choice.get() not in data.columns:
                 self.value_label.config(fg="red")
                 self.value_label.config(text="* Pivot values column:")
+                if self.index_choice.get() not in data.columns:
+                    messagebox.showerror("Error", "Please choose a valid index and value column name!")
+                    self.index_label.config(fg="red")
+                    self.index_label.config(text="* Pivot index column:")
+                    return
+                self.index_label.config(fg="#5ea832")
+                self.index_label.config(text="Pivot index column:")
+                messagebox.showerror("Error", "Please choose a valid value column name!")
                 return
+            elif self.index_choice.get() not in data.columns:
+                self.index_label.config(fg="red")
+                self.index_label.config(text="* Pivot index column:")
+                if self.value_label.get() not in data.columns:
+                    messagebox.showerror("Error", "Please choose a valid index and value column name!")
+                    self.value_label.config(fg="red")
+                    self.value_label.config(text="* Pivot values column:")
+                    return
+                self.value_label.config(fg="#5ea832")
+                self.value_label.config(text="Pivot value column:")
+                messagebox.showerror("Error", "Please choose a valid index column name!")
+                return
+            else:
+                if data[self.value_choice.get()].dtype == "int64" or data[self.value_choice.get()].dtype == "float64":
+                    self.value_label.config(fg="#5ea832")
+                    self.value_label.config(text="Pivot values column:")
+                    self.index_label.config(fg="#5ea832")
+                    self.index_label.config(text="Pivot index column:")
+                else:
+                    messagebox.showerror("Error", f"Value column has \"{data[self.value_choice.get()].dtype}\" datatype. Please choose a column with integers!")
+                    self.value_label.config(fg="red")
+                    self.value_label.config(text="* Pivot values column:")
+                    return
+
+           
+            pivot_table_df = pd.pivot_table(data, index=self.index_choice.get(), values=self.value_choice.get(), aggfunc=self.agg_choice.get())
+            self.index_label.config(fg="#5ea832")
+            self.index_label.config(text="Pivot index column:")
+            self.value_label.config(fg="#5ea832")
+            self.value_label.config(text="Pivot values column:")
             
             for row in dataframe_to_rows(pivot_table_df, index=True, header=True):
                 pivot_sheet.append(row)
