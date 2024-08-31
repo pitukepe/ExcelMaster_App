@@ -40,7 +40,7 @@ class App:
         self.pivot_button.grid(row=3, column=0, padx=10, pady=10)
 
         # Excel plotter site button
-        self.plotter_button = tk.Button(self.master, text="Excel Graph Plotter", command = lambda:messagebox.showinfo("Error", "This page is still being developed."), activeforeground="blue", background="#0b2838")
+        self.plotter_button = tk.Button(self.master, text="Excel Graph Plotter", command = self.plotter_page, activeforeground="blue", background="#0b2838")
         self.plotter_button.grid(row=4, column=0, padx=10, pady=10)
 
         # Excel formula applier site button
@@ -303,6 +303,7 @@ class App:
 
     # Pivot creation and saving function
     def create_pivot(self):
+        # Checking if all fields are filled
         if not self.file.get():
             self.filelabel.config(text="* Choose Excel file:")
             self.filelabel.config(fg="red")
@@ -311,9 +312,12 @@ class App:
         else:
             self.filelabel.config(text="Choose Excel file:")
             self.filelabel.config(fg="#5ea832")
-
+            
+            # Creating a new sheet for the pivot table
             wb = load_workbook(self.file.get())
             pivot_sheet = wb.create_sheet(title="PivotTable")
+            
+            # Reading the data from the Excel file
             try:
                 data = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get())
                 self.sheet_label.config(fg="#5ea832")
@@ -324,7 +328,7 @@ class App:
                 self.sheet_label.config(text="* Data Sheet name:")
                 return
             
-            ###trying if the self.value_choice.get() is a column with integers
+            # handling missing and incorrect data
             if self.value_choice.get() not in data.columns:
                 self.value_label.config(fg="red")
                 self.value_label.config(text="* Pivot values column:")
@@ -361,19 +365,137 @@ class App:
                     self.value_label.config(text="* Pivot values column:")
                     return
 
-           
+            # Creating the pivot table
             pivot_table_df = pd.pivot_table(data, index=self.index_choice.get(), values=self.value_choice.get(), aggfunc=self.agg_choice.get())
             self.index_label.config(fg="#5ea832")
             self.index_label.config(text="Pivot index column:")
             self.value_label.config(fg="#5ea832")
             self.value_label.config(text="Pivot values column:")
             
+            # Writing the pivot table to the Excel file
             for row in dataframe_to_rows(pivot_table_df, index=True, header=True):
                 pivot_sheet.append(row)
             
+            # Saving the Excel file
             wb.save(self.file.get())
             messagebox.showinfo("Success", f"Pivot table created successfully!")
             
+
+    ## Graph plotter page
+    def plotter_page(self):
+        # Destroying all widgets from the main page
+        for i in self.master.winfo_children():
+            i.destroy()
+        
+        # Main geometry
+        self.master.geometry("520x240")
+        
+        # Back button
+        back_button = tk.Button(self.master, text="<<<", command=self.main_page, cursor="hand2", activeforeground="blue")
+        back_button.grid(row=0, column=0, padx=10, sticky="w")
+
+        # Pivot page title
+        tk.Label(self.master, text = "Excel Graph Plotter", font=("Times","20"), fg="#5ea832", bg="#0b2838").grid(row=1, column=1, padx=10, sticky="w")
+
+        # Choosing an Excel file and reading it into pandas dataframe
+        self.filelabel = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.filelabel.grid(row=2, column=0, padx=5, sticky="w")
+        self.file = tk.Entry(self.master, state="disabled")
+        self.file.grid(row=2, column=1, sticky="w")
+        self.file_button = tk.Button(self.master, text="Choose file", command=self.choose_file, activeforeground="blue", bg="#0b2838")
+        self.file_button.grid(row=2, column=2)
+
+
+         # Specifying if there is an index in the excell file
+        tk.Label(self.master, text="Does your file have index?", font=("Times","15"), fg="#5ea832", bg="#0b2838").grid(row=3, column=0, padx=5, sticky="w")
+        self.index_check = tk.IntVar()
+        self.index = tk.Checkbutton(self.master, variable=self.index_check, onvalue=1, offvalue=0, activeforeground="blue", command=self.index_read, bg="#0b2838")
+        self.index.grid(row=3, column=1, sticky="w")
+        self.index_col_label = tk.Label(self.master, text="Index num:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.index_col = tk.Entry(self.master, width=2)
+
+        # Choosing a data sheet
+        self.sheet_label = tk.Label(self.master, text="Data Sheet name:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.sheet_label.grid(row=4, column=0, padx=5, sticky="w")
+        self.sheet_choice = tk.Entry(self.master, width=10)
+        self.sheet_choice.insert(0, "Sheet1")
+        self.sheet_choice.grid(row=4, column=1, sticky="w")
+
+        # Choosing graph type
+        tk.Label(self.master, text="Graph type:", font=("Times","15"), fg="#5ea832", bg="#0b2838").grid(row=5, column=0, padx=5, sticky="w")
+        self.graph_choice = tk.StringVar()
+        self.graph_choice_combobox = ttk.Combobox(self.master, textvariable=self.graph_choice, state="readonly", values=["box", "line", "bar", "scatter", "pie"], width=10)
+        self.graph_choice_combobox.grid(row=5, column=1, sticky="w")
+        self.graph_choice_combobox.bind("<<ComboboxSelected>>", self.graph_type_selected)
+        
+        # Box graph parameter choosing:
+        self.box_graph_param_var = tk.StringVar()
+        self.box_graph_param_choice = ttk.Combobox(self.master, textvariable=self.box_graph_param_var, state="readonly", values=[None])
+        self.plot_button = tk.Button(self.master, text="Plot!", command=None, activeforeground="blue", bg="#0b2838")
+
+
+        # changing the input entrys and buttons according to the graph type
+    def graph_type_selected(self, event):
+        try:
+            # Reading the excel file into pandas dataframe
+            if self.index_check.get() == 1:
+                self.df = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get(), index_col=int(self.index_col.get())-1)
+            else:
+                self.df = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get())
+            # Label for the graph entry
+            self.graph_label = tk.Label(self.master, text="Graph plot", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+            self.graph_label.grid(row=6, column=0, padx=5, sticky="w")
+            
+            # Box graph parameter choosing:
+            if self.graph_choice.get() == "box":
+                self.graph_label.config(text="Box plot:")
+                box_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
+                self.box_graph_param_choice.config(values=box_values)
+                self.box_graph_param_choice.grid(row=6, column=1, sticky="w")
+                self.box_graph_param_choice.current(0)
+                self.plot_button.grid(row=6, column=2, sticky="w")
+                self.plot_button.config(command=self.plot_box)
+            # Line graph parameter choosing:
+            elif self.graph_choice.get() == "line":
+                self.graph_label.config(text="Line plot:")
+                self.box_graph_param_choice.grid_forget()
+                self.plot_button.grid_forget()
+            # Bar graph parameter choosing:
+            elif self.graph_choice.get() == "bar":
+                self.graph_label.config(text="Bar plot:")
+                self.box_graph_param_choice.grid_forget()
+                self.plot_button.grid_forget()
+            # Scatter graph parameter choosing:
+            elif self.graph_choice.get() == "scatter":
+                self.graph_label.config(text="Scatter plot:")
+                self.box_graph_param_choice.grid_forget()
+                self.plot_button.grid_forget()
+            # Pie graph parameter choosing:
+            elif self.graph_choice.get() == "pie":
+                self.graph_label.config(text="Pie plot:")
+                self.box_graph_param_choice.grid_forget()
+                self.plot_button.grid_forget()
+        # exception for the case when there is no file chosen
+        except Exception:
+            tk.messagebox.showerror("Error", "Please choose a file first!")
+            return
+
+
+    # Plotting the BOX graph
+    def plot_box(self):
+        self.df[self.box_graph_param_var.get()].plot(kind=self.graph_choice.get(), vert=False)
+        plt.title(self.box_graph_param_var.get())
+        plt.show()
+
+    # Reading the index column
+    def index_read(self):
+        if self.index_check.get() == 1:
+            self.index_col_label.grid(row=3, column=1,columnspan=2)
+            self.index_col.grid(row=3, column=1,columnspan=2, padx=70, sticky="e")
+        else:
+            self.index_col_label.grid_forget()
+            self.index_col.grid_forget()
+
 
 #### GUI ####
 gui = tk.Tk()
