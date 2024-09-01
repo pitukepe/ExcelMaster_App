@@ -67,8 +67,8 @@ class App:
         tk.Label(self.master, text = "Excel Cleaner", font=("Times","20"), fg="#5ea832", bg="#0b2838").grid(row=1, column=1, padx=10, sticky="w")
 
         # Choosing an Excel file with button
-        self.filelabel = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
-        self.filelabel.grid(row=2, column=0, padx=5, sticky="w")
+        self.file_label = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.file_label.grid(row=2, column=0, padx=5, sticky="w")
         self.file = tk.Entry(self.master, state="disabled")
         self.file.grid(row=2, column=1, sticky="w")
         file_button = tk.Button(self.master, text="Choose file", command=self.choose_file, activeforeground="blue", bg="#0b2838")
@@ -198,19 +198,19 @@ class App:
     ## Cleaning+Saving function
     def clean(self):
         if not self.file.get():
-            self.filelabel.config(text="* Choose Excel file:")
-            self.filelabel.config(fg="red")
+            self.file_label.config(text="* Choose Excel file:")
+            self.file_label.config(fg="red")
             messagebox.showwarning("Warning", "Please choose a file!")
             return
         else:
-            self.filelabel.config(text="Choose Excel file:")
-            self.filelabel.config(fg="#5ea832")
+            self.file_label.config(text="Choose Excel file:")
+            self.file_label.config(fg="#5ea832")
 
             # Throwing an error if the directory doesn't exitst
             if not os.path.exists(self.file.get()):
                 messagebox.showerror("Error", "The directory or file does not exist!")
-                self.filelabel.config(text="* Choose Excel file:")
-                self.filelabel.config(fg="red")
+                self.file_label.config(text="* Choose Excel file:")
+                self.file_label.config(fg="red")
                 return
 
             # Reading the original file and creating a new file with _cleaned appended and the chosen output type
@@ -264,8 +264,8 @@ class App:
         tk.Label(self.master, text = "Excel Pivot table Creator", font=("Times","20"), fg="#5ea832", bg="#0b2838").grid(row=1, column=1, padx=10, sticky="w")
 
         # Choosing an Excel file
-        self.filelabel = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
-        self.filelabel.grid(row=2, column=0, padx=5, sticky="w")
+        self.file_label = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.file_label.grid(row=2, column=0, padx=5, sticky="w")
         self.file = tk.Entry(self.master, state="disabled")
         self.file.grid(row=2, column=1, sticky="w")
         self.file_button = tk.Button(self.master, text="Choose file", command=self.choose_file, activeforeground="blue", bg="#0b2838")
@@ -305,13 +305,13 @@ class App:
     def create_pivot(self):
         # Checking if all fields are filled
         if not self.file.get():
-            self.filelabel.config(text="* Choose Excel file:")
-            self.filelabel.config(fg="red")
+            self.file_label.config(text="* Choose Excel file:")
+            self.file_label.config(fg="red")
             messagebox.showwarning("Warning", "Please choose a file!")
             return
         else:
-            self.filelabel.config(text="Choose Excel file:")
-            self.filelabel.config(fg="#5ea832")
+            self.file_label.config(text="Choose Excel file:")
+            self.file_label.config(fg="#5ea832")
             
             # Creating a new sheet for the pivot table
             wb = load_workbook(self.file.get())
@@ -398,8 +398,8 @@ class App:
         tk.Label(self.master, text = "Excel Graph Plotter", font=("Times","20"), fg="#5ea832", bg="#0b2838").grid(row=1, column=1, padx=10, sticky="w")
 
         # Choosing an Excel file and reading it into pandas dataframe
-        self.filelabel = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
-        self.filelabel.grid(row=2, column=0, padx=5, sticky="w")
+        self.file_label = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.file_label.grid(row=2, column=0, padx=5, sticky="w")
         self.file = tk.Entry(self.master, state="disabled")
         self.file.grid(row=2, column=1, sticky="w")
         self.file_button = tk.Button(self.master, text="Choose file", command=self.choose_file, activeforeground="blue", bg="#0b2838")
@@ -430,9 +430,13 @@ class App:
         
         # Box graph parameter choosing:
         self.box_graph_param_var = tk.StringVar()
-        self.box_graph_param_choice = ttk.Combobox(self.master, textvariable=self.box_graph_param_var, state="readonly", values=[None])
-        self.plot_button = tk.Button(self.master, text="Plot!", command=None, activeforeground="blue", bg="#0b2838")
-
+        self.box_graph_param_choice = ttk.Combobox(self.master, textvariable=self.box_graph_param_var, state="readonly", values=[None], width=10)
+        self.box_include_label = tk.Label(self.master, text="Include:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.box_include_median_var = tk.IntVar()
+        self.box_include_median = tk.Checkbutton(self.master, variable=self.box_include_median_var, text="median line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
+        self.box_include_mean_var = tk.IntVar()
+        self.box_include_mean = tk.Checkbutton(self.master, variable=self.box_include_mean_var, text="mean line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
+        self.box_plot_button = tk.Button(self.master, text="Plot!", command=None, activeforeground="blue", bg="#0b2838")
 
         # changing the input entrys and buttons according to the graph type
     def graph_type_selected(self, event):
@@ -446,37 +450,49 @@ class App:
             self.graph_label = tk.Label(self.master, text="Graph plot", font=("Times","15"), fg="#5ea832", bg="#0b2838")
             self.graph_label.grid(row=6, column=0, padx=5, sticky="w")
             
+            # Restoring file_label to its original state if exception ran
+            self.file_label.config(text="Choose Excel file:")
+            self.file_label.config(fg="#5ea832")
+
+            # Graph choice
+            choice = self.graph_choice.get()
+
             # Box graph parameter choosing:
-            if self.graph_choice.get() == "box":
+            if choice == "box":
                 self.graph_label.config(text="Box plot:")
                 box_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
                 self.box_graph_param_choice.config(values=box_values)
                 self.box_graph_param_choice.grid(row=6, column=1, sticky="w")
                 self.box_graph_param_choice.current(0)
-                self.plot_button.grid(row=6, column=2, sticky="w")
-                self.plot_button.config(command=self.plot_box)
+                self.box_include_label.grid(row=7, column=0, padx=5, sticky="w")
+                self.box_include_median.grid(row=7, column=1, sticky="w")
+                self.box_include_mean.grid(row=7, column=1, columnspan=2)
+                self.box_plot_button.grid(row=7, column=2, sticky="w")
+                self.box_plot_button.config(command=self.plot_box)
             # Line graph parameter choosing:
-            elif self.graph_choice.get() == "line":
+            elif choice == "line":
                 self.graph_label.config(text="Line plot:")
                 self.box_graph_param_choice.grid_forget()
-                self.plot_button.grid_forget()
+                self.box_plot_button.grid_forget()
             # Bar graph parameter choosing:
-            elif self.graph_choice.get() == "bar":
+            elif choice == "bar":
                 self.graph_label.config(text="Bar plot:")
                 self.box_graph_param_choice.grid_forget()
-                self.plot_button.grid_forget()
+                self.box_plot_button.grid_forget()
             # Scatter graph parameter choosing:
-            elif self.graph_choice.get() == "scatter":
+            elif choice == "scatter":
                 self.graph_label.config(text="Scatter plot:")
                 self.box_graph_param_choice.grid_forget()
-                self.plot_button.grid_forget()
+                self.box_plot_button.grid_forget()
             # Pie graph parameter choosing:
-            elif self.graph_choice.get() == "pie":
+            elif choice == "pie":
                 self.graph_label.config(text="Pie plot:")
                 self.box_graph_param_choice.grid_forget()
-                self.plot_button.grid_forget()
+                self.box_plot_button.grid_forget()
         # exception for the case when there is no file chosen
         except Exception:
+            self.file_label.config(text="* Choose Excel file:")
+            self.file_label.config(fg="red")
             tk.messagebox.showerror("Error", "Please choose a file first!")
             return
 
@@ -485,6 +501,12 @@ class App:
     def plot_box(self):
         self.df[self.box_graph_param_var.get()].plot(kind=self.graph_choice.get(), vert=False)
         plt.title(self.box_graph_param_var.get())
+        if self.box_include_median_var.get() == 1:
+            plt.axvline(self.df[self.box_graph_param_var.get()].median(), color="green", label="Median")
+        if self.box_include_mean_var.get() == 1:
+            plt.axvline(self.df[self.box_graph_param_var.get()].mean(), color="red", linestyle="-.", label="Mean")
+        #legend
+        plt.legend(loc="best")
         plt.show()
 
     # Reading the index column
