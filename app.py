@@ -428,28 +428,55 @@ class App:
         self.graph_choice_combobox.grid(row=5, column=1, sticky="w")
         self.graph_choice_combobox.bind("<<ComboboxSelected>>", self.graph_type_selected)
         
+        # General Properties for Plotting + Plotting Button
+        self.include_label = tk.Label(self.master, text="Include:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.include_median_var = tk.IntVar()
+        self.include_median = tk.Checkbutton(self.master, variable=self.include_median_var, text="median line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
+        self.include_mean_var = tk.IntVar()
+        self.include_mean = tk.Checkbutton(self.master, variable=self.include_mean_var, text="mean line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
+        self.graph_plot_button = tk.Button(self.master, text="Plot!", command=self.plot_graph, activeforeground="blue", bg="#0b2838", width=20)
+
+
         # Box graph parameter choosing:
         self.box_graph_param_var = tk.StringVar()
         self.box_graph_param_choice = ttk.Combobox(self.master, textvariable=self.box_graph_param_var, state="readonly", values=[None], width=10)
-        self.box_include_label = tk.Label(self.master, text="Include:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
-        self.box_include_median_var = tk.IntVar()
-        self.box_include_median = tk.Checkbutton(self.master, variable=self.box_include_median_var, text="median line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
-        self.box_include_mean_var = tk.IntVar()
-        self.box_include_mean = tk.Checkbutton(self.master, variable=self.box_include_mean_var, text="mean line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
-        self.box_plot_button = tk.Button(self.master, text="Plot!", command=None, activeforeground="blue", bg="#0b2838", width=20)
 
-        # changing the input entrys and buttons according to the graph type
+        # Line graph parameter choosing:
+        self.line_graph_param_var = tk.StringVar()
+        self.line_graph_param_choice = ttk.Combobox(self.master, textvariable=self.line_graph_param_var, state="readonly", values=[None], width=10)
+        
+        # Bar graph parameter choosing:
+        self.bar_graph_param_choice_x_label= tk.Label(self.master, text="X axis:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.bar_graph_param_var_x = tk.StringVar()
+        self.bar_graph_param_choice_x = ttk.Combobox(self.master, textvariable=self.bar_graph_param_var_x, state="readonly", values=[None], width=10)
+        self.bar_graph_param_choice_y_label= tk.Label(self.master, text="Y axis:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.bar_graph_param_var_y = tk.StringVar()
+        self.bar_graph_param_choice_y = ttk.Combobox(self.master, textvariable=self.bar_graph_param_var_y, state="readonly", values=[None], width=10)
+        self.bar_graph_agg_label= tk.Label(self.master, text="Agg:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.bar_graph_agg_var = tk.StringVar()
+        self.bar_graph_agg_choice = ttk.Combobox(self.master, textvariable=self.bar_graph_agg_var, state="readonly", values=[None, "sum", "count", "mean", "max", "min", "median"], width=5)
+        self.bar_graph_agg_choice.current(0)
+
+        # Scatter graph parameter choosing:
+        self.scatter_graph_param_var = tk.StringVar()
+        self.scatter_graph_param_choice = ttk.Combobox(self.master, textvariable=self.scatter_graph_param_var, state="readonly", values=[None], width=10)
+
+        # Pie graph parameter choosing:
+        self.pie_graph_param_var = tk.StringVar()
+        self.pie_graph_param_choice = ttk.Combobox(self.master, textvariable=self.pie_graph_param_var, state="readonly", values=[None], width=10)
+        
+        
+    # changing the input entrys and buttons according to the graph type
     def graph_type_selected(self, event):
         try:
             # Reading the excel file into pandas dataframe
-            if self.index_check.get() == 1:
+            if self.index_check.get():
                 self.df = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get(), index_col=int(self.index_col.get())-1)
             else:
                 self.df = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get())
             # Label for the graph entry
-            self.graph_label = tk.Label(self.master, text="Graph plot", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+            self.graph_label = tk.Label(self.master, text="<3", font=("Times","15"), fg="#5ea832", bg="#0b2838")
             self.graph_label.grid(row=6, column=0, padx=5, sticky="w")
-            
             # Restoring file_label to its original state if exception ran
             self.file_label.config(text="Choose Excel file:")
             self.file_label.config(fg="#5ea832")
@@ -459,37 +486,87 @@ class App:
 
             # Box graph parameter choosing:
             if choice == "box":
+                # label change and geometry
                 self.graph_label.config(text="Box plot:")
                 self.master.geometry("520x300")
+                # forgetting
+                self.line_graph_param_choice.grid_forget()
+                self.bar_graph_param_choice_x.grid_forget()
+                self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_agg_label.grid_forget()
+                self.bar_graph_agg_choice.grid_forget()
+                # setting up
                 box_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
                 self.box_graph_param_choice.config(values=box_values)
                 self.box_graph_param_choice.grid(row=6, column=1, sticky="w")
                 self.box_graph_param_choice.current(0)
-                self.box_include_label.grid(row=7, column=0, padx=5, sticky="w")
-                self.box_include_median.grid(row=7, column=1, sticky="w")
-                self.box_include_mean.grid(row=7, column=1, columnspan=2)
-                self.box_plot_button.grid(row=8, column=0, columnspan=3)
-                self.box_plot_button.config(command=self.plot_box)
+                self.include_label.grid(row=7, column=0, padx=5, sticky="w")
+                self.include_median.grid(row=7, column=1, sticky="w")
+                self.include_mean.grid(row=7, column=1, columnspan=2)
+                self.graph_plot_button.grid(row=8, column=0, columnspan=3)
             # Line graph parameter choosing:
             elif choice == "line":
+                # label change and geometry
                 self.graph_label.config(text="Line plot:")
+                self.master.geometry("520x300")
+                # forgetting
                 self.box_graph_param_choice.grid_forget()
-                self.box_plot_button.grid_forget()
+                self.bar_graph_param_choice_x.grid_forget()
+                self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_agg_label.grid_forget()
+                self.bar_graph_agg_choice.grid_forget()
+                # setting up
+                line_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
+                self.line_graph_param_choice.config(values=line_values)
+                self.line_graph_param_choice.grid(row=6, column=1, sticky="w")
+                self.include_label.grid(row=7, column=0, padx=5, sticky="w")
+                self.include_median.grid(row=7, column=1, sticky="w")
+                self.include_mean.grid(row=7, column=1, columnspan=2)
+                self.graph_plot_button.grid(row=8, column=0, columnspan=3)
             # Bar graph parameter choosing:
             elif choice == "bar":
+                # label change and geometry
                 self.graph_label.config(text="Bar plot:")
+                self.master.geometry("520x300")
+                # forgetting
                 self.box_graph_param_choice.grid_forget()
-                self.box_plot_button.grid_forget()
+                self.line_graph_param_choice.grid_forget()
+                # setting up
+                bar_values_x = [x for x in self.df.columns]
+                bar_values_y = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
+                self.bar_graph_param_choice_x.config(values=bar_values_x)
+                self.bar_graph_param_choice_y.config(values=bar_values_y)
+                self.bar_graph_param_choice_x_label.grid(row=6, column=0, columnspan=1, padx=7)
+                self.bar_graph_param_choice_y_label.grid(row=7, column=0, columnspan=1, padx=7)
+                self.bar_graph_param_choice_x.grid(row=6, column=0, columnspan=2, padx=5)
+                self.bar_graph_param_choice_y.grid(row=7, column=0, columnspan=2, padx=5)
+                self.bar_graph_agg_label.grid(row=7, column=1, columnspan=2, padx=5)
+                self.bar_graph_agg_choice.grid(row=7,column=2, sticky="w")
+                self.graph_plot_button.grid(row=8, column=0, columnspan=3)
             # Scatter graph parameter choosing:
             elif choice == "scatter":
+                # label change and geometry
+                self.master.geometry("520x300")
+                self.graph_label.config(text="Scatter plot:")
+                # forgetting
                 self.graph_label.config(text="Scatter plot:")
                 self.box_graph_param_choice.grid_forget()
-                self.box_plot_button.grid_forget()
+                self.line_graph_param_choice.grid_forget()
+                self.bar_graph_param_choice_x.grid_forget()
+                self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_agg_label.grid_forget()
+                self.bar_graph_agg_choice.grid_forget()
+                # setting up
+                
             # Pie graph parameter choosing:
             elif choice == "pie":
                 self.graph_label.config(text="Pie plot:")
                 self.box_graph_param_choice.grid_forget()
-                self.box_plot_button.grid_forget()
+                self.line_graph_param_choice.grid_forget()
+                self.bar_graph_param_choice_x.grid_forget()
+                self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_agg_label.grid_forget()
+                self.bar_graph_agg_choice.grid_forget()
         # exception for the case when there is no file chosen
         except Exception:
             self.file_label.config(text="* Choose Excel file:")
@@ -498,19 +575,53 @@ class App:
             return
 
 
-    # Plotting the BOX graph
-    def plot_box(self):
-        self.df[self.box_graph_param_var.get()].plot(kind=self.graph_choice.get(), vert=False)
-        plt.title(self.box_graph_param_var.get())
-        if self.box_include_median_var.get() == 1:
-            plt.axvline(self.df[self.box_graph_param_var.get()].median(), color="green", label="Median")
-            plt.legend(loc="best")
-        if self.box_include_mean_var.get() == 1:
-            plt.axvline(self.df[self.box_graph_param_var.get()].mean(), color="red", linestyle="-.", label="Mean")
-            plt.legend(loc="best")
+    # Plotting a graph function
+    def plot_graph(self):
+        # Box plot
+        if self.graph_choice.get() == "box":
+            self.df[self.box_graph_param_var.get()].plot(kind="box", vert=False)
+            plt.title(self.box_graph_param_var.get())
+            if self.include_median_var.get() == 1:
+                plt.axvline(self.df[self.box_graph_param_var.get()].median(), color="green", label=f"median({round(self.df[self.line_graph_param_var.get()].median(),2)})")
+                plt.legend(loc="best")
+            if self.include_mean_var.get() == 1:
+                plt.axvline(self.df[self.box_graph_param_var.get()].mean(), color="red", linestyle="-.", label=f"mean({round(self.df[self.line_graph_param_var.get()].mean(),2)})")
+                plt.legend(loc="best")
+        # Line plot
+        elif self.graph_choice.get() == "line":
+            self.df[self.line_graph_param_var.get()].plot(kind="line")
+            plt.title(self.line_graph_param_var.get())
+            if self.include_median_var.get() == 1:
+                plt.axhline(self.df[self.line_graph_param_var.get()].median(), color="green", label=f"median({round(self.df[self.line_graph_param_var.get()].median(),2)})")
+                plt.legend(loc="best")
+            if self.include_mean_var.get() == 1:
+                plt.axhline(self.df[self.line_graph_param_var.get()].mean(), color="red", linestyle="-.", label=f"mean({round(self.df[self.line_graph_param_var.get()].mean(),2)})")
+                plt.legend(loc="best")
+        # Bar plot
+        elif self.graph_choice.get() == "bar":
+            agg = self.bar_graph_agg_choice.get()
+            # changing y axis based on the aggregation
+            if agg == "sum":
+                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].sum().plot(kind="bar")
+            elif agg == "mean":
+                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].mean().plot(kind="bar")
+            elif agg == "median":
+                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].median().plot(kind="bar")
+            elif agg == "max":
+                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].max().plot(kind="bar")
+            elif agg == "min":
+                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].min().plot(kind="bar")
+            elif agg == "count":
+                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].count().plot(kind="bar")
+            else:
+                self.df.plot(kind="bar", x=self.bar_graph_param_choice_x.get(), y=self.bar_graph_param_choice_y.get())
+            plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()}")
+        # Scatter plot
+            
         plt.show()
 
-    # Reading the index column
+
+    # Toggle the index column function
     def index_read(self):
         if self.index_check.get() == 1:
             self.index_col_label.grid(row=3, column=1,columnspan=2)
