@@ -173,7 +173,7 @@ class App:
             self.file.config(state="disabled")
 
     ## SQLite handling function
-    def sqlite_convert(self, filename, tablename,df):
+    def sqlite_convert(self, filename, tablename, df):
         ###creating sqlite database
         if tablename == "":
             table_name = "my_table"
@@ -186,7 +186,10 @@ class App:
             return
         ###converting pandas df to sqlite table
         try:
-            df.to_sql(table_name, connection, if_exists='replace', index=False)
+            if self.index_check.get():
+                df.to_sql(table_name, connection, if_exists='replace', index=True)
+            else:
+                df.to_sql(table_name, connection, if_exists='replace', index=False)
             messagebox.showinfo("Success", f"Excel file converted to an SQLite database with a table \"{table_name}\" successfully!")
         except Exception as e:
             messagebox.showerror('Error', f"Error occured while converting the excel file to SQLite table: {e}")
@@ -227,19 +230,34 @@ class App:
                 df = pd.read_excel(original_file_path, index_col=int(self.index_col.get())-1)
             
             # Cleaning
+            removed_count = 0
             if self.clean_option1.get():
+                removed_count += df.duplicated().sum()
                 df.drop_duplicates(inplace=True)
                 df.reset_index(drop=True, inplace=True)
+                df.index = df.index + 1
             if self.clean_option2.get():
+                if self.how.get() == "any":
+                    removed_count += df.isna().any().sum()
+                else:
+                    removed_count += df.isna().all().sum()
                 df.dropna(how=self.how.get(), inplace=True)
                 df.reset_index(drop=True, inplace=True)
+                df.index = df.index + 1
+            messagebox.showinfo("Success", f"{removed_count} rows removed.")
 
             # Saving file
             if self.output_choice.get() == ".xlsx":
-                df.to_excel(cleaned_file_path, index=False)
+                if self.index_check.get():
+                    df.to_excel(cleaned_file_path, index=True)
+                else:
+                    df.to_excel(cleaned_file_path, index=False)
                 messagebox.showinfo("Success", f"Excel file cleaned and saved as \"{cleaned_filename}\" successfully!")
             elif self.output_choice.get() == ".csv":
-                df.to_csv(cleaned_file_path, index=False)
+                if self.index_check.get():
+                    df.to_csv(cleaned_file_path, index=True)
+                else:
+                    df.to_csv(cleaned_file_path, index=False)
                 messagebox.showinfo("Success", f"Excel file converted to a CSV file and saved as \"{cleaned_filename}\" successfully!")
             elif self.output_choice.get() == ".sqlite":
                 self.sqlite_convert(cleaned_file_path, self.tablename.get(), df)
@@ -409,7 +427,7 @@ class App:
          # Specifying if there is an index in the excell file
         tk.Label(self.master, text="Does your file have index?", font=("Times","15"), fg="#5ea832", bg="#0b2838").grid(row=3, column=0, padx=5, sticky="w")
         self.index_check = tk.IntVar()
-        self.index = tk.Checkbutton(self.master, variable=self.index_check, onvalue=1, offvalue=0, activeforeground="blue", command=self.index_read, bg="#0b2838")
+        self.index = tk.Checkbutton(self.master, variable=self.index_check, text="(no)", onvalue=1, offvalue=0, activeforeground="blue", command=self.index_read, fg="#5ea832", bg="#0b2838")
         self.index.grid(row=3, column=1, sticky="w")
         self.index_col_label = tk.Label(self.master, text="Index num:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.index_col = tk.Entry(self.master, width=2)
@@ -557,7 +575,7 @@ class App:
                 self.bar_graph_agg_label.grid_forget()
                 self.bar_graph_agg_choice.grid_forget()
                 # setting up
-                
+
             # Pie graph parameter choosing:
             elif choice == "pie":
                 self.graph_label.config(text="Pie plot:")
@@ -574,7 +592,7 @@ class App:
             tk.messagebox.showerror("Error", "Please choose a file first!")
             return
 
-
+    #Handle missing values in the plotting phase???
     # Plotting a graph function
     def plot_graph(self):
         # Box plot
@@ -626,9 +644,11 @@ class App:
         if self.index_check.get() == 1:
             self.index_col_label.grid(row=3, column=1,columnspan=2)
             self.index_col.grid(row=3, column=1,columnspan=2, padx=70, sticky="e")
+            self.index.config(text="(yes)")
         else:
             self.index_col_label.grid_forget()
             self.index_col.grid_forget()
+            self.index.config(text="(no)")
 
 
 #### GUI ####
