@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import sqlite3
 import tkinter as tk
@@ -447,6 +448,7 @@ class App:
         self.graph_choice_combobox.bind("<<ComboboxSelected>>", self.graph_type_selected)
         
         # General Properties for Plotting + Plotting Button
+        self.graph_label = tk.Label(self.master, text="<3", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.include_label = tk.Label(self.master, text="Include:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.include_median_var = tk.IntVar()
         self.include_median = tk.Checkbutton(self.master, variable=self.include_median_var, text="median line", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
@@ -467,12 +469,14 @@ class App:
         self.bar_graph_param_choice_x_label= tk.Label(self.master, text="X axis:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.bar_graph_param_var_x = tk.StringVar()
         self.bar_graph_param_choice_x = ttk.Combobox(self.master, textvariable=self.bar_graph_param_var_x, state="readonly", values=[None], width=10)
+        self.bar_graph_param_choice_x.bind("<<ComboboxSelected>>", self.bar_graph_x_selected)
         self.bar_graph_param_choice_y_label= tk.Label(self.master, text="Y axis:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.bar_graph_param_var_y = tk.StringVar()
         self.bar_graph_param_choice_y = ttk.Combobox(self.master, textvariable=self.bar_graph_param_var_y, state="readonly", values=[None], width=10)
+        self.bar_graph_param_choice_y.bind("<<ComboboxSelected>>", self.bar_graph_y_selected)
         self.bar_graph_agg_label= tk.Label(self.master, text="Agg:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.bar_graph_agg_var = tk.StringVar()
-        self.bar_graph_agg_choice = ttk.Combobox(self.master, textvariable=self.bar_graph_agg_var, state="readonly", values=[None, "sum", "count", "mean", "max", "min", "median"], width=5)
+        self.bar_graph_agg_choice = ttk.Combobox(self.master, textvariable=self.bar_graph_agg_var, state="readonly", values=["none", "sum", "count", "mean", "max", "min", "median"], width=5)
         self.bar_graph_agg_choice.current(0)
 
         # Scatter graph parameter choosing:
@@ -492,16 +496,15 @@ class App:
                 self.df = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get(), index_col=int(self.index_col.get())-1)
             else:
                 self.df = pd.read_excel(self.file.get(), sheet_name=self.sheet_choice.get())
-            # Label for the graph entry
-            self.graph_label = tk.Label(self.master, text="<3", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+           
+            # Placing the Graph Label for the graph entry
             self.graph_label.grid(row=6, column=0, padx=5, sticky="w")
-            # Restoring file_label to its original state if exception ran
+            # Restoring file_label to its original state if an exception ran
             self.file_label.config(text="Choose Excel file:")
             self.file_label.config(fg="#5ea832")
 
             # Graph choice
             choice = self.graph_choice.get()
-
             # Box graph parameter choosing:
             if choice == "box":
                 # label change and geometry
@@ -511,6 +514,8 @@ class App:
                 self.line_graph_param_choice.grid_forget()
                 self.bar_graph_param_choice_x.grid_forget()
                 self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_param_choice_x_label.grid_forget()
+                self.bar_graph_param_choice_y_label.grid_forget()
                 self.bar_graph_agg_label.grid_forget()
                 self.bar_graph_agg_choice.grid_forget()
                 # setting up
@@ -531,11 +536,14 @@ class App:
                 self.box_graph_param_choice.grid_forget()
                 self.bar_graph_param_choice_x.grid_forget()
                 self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_param_choice_x_label.grid_forget()
+                self.bar_graph_param_choice_y_label.grid_forget()
                 self.bar_graph_agg_label.grid_forget()
                 self.bar_graph_agg_choice.grid_forget()
                 # setting up
                 line_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
                 self.line_graph_param_choice.config(values=line_values)
+                self.line_graph_param_choice.current(0)
                 self.line_graph_param_choice.grid(row=6, column=1, sticky="w")
                 self.include_label.grid(row=7, column=0, padx=5, sticky="w")
                 self.include_median.grid(row=7, column=1, sticky="w")
@@ -547,15 +555,18 @@ class App:
                 self.graph_label.config(text="Bar plot:")
                 self.master.geometry("520x300")
                 # forgetting
+                self.include_label.grid_forget()
+                self.include_median.grid_forget()
+                self.include_mean.grid_forget()
                 self.box_graph_param_choice.grid_forget()
                 self.line_graph_param_choice.grid_forget()
                 # setting up
-                bar_values_x = [x for x in self.df.columns]
-                bar_values_y = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
-                self.bar_graph_param_choice_x.config(values=bar_values_x)
-                self.bar_graph_param_choice_y.config(values=bar_values_y)
-                self.bar_graph_param_choice_x_label.grid(row=6, column=0, columnspan=1, padx=7)
-                self.bar_graph_param_choice_y_label.grid(row=7, column=0, columnspan=1, padx=7)
+                self.bar_values_x = [x for x in self.df.columns]
+                self.bar_values_y = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
+                self.bar_graph_param_choice_x.config(values=self.bar_values_x)
+                self.bar_graph_param_choice_y.config(values=self.bar_values_y)
+                self.bar_graph_param_choice_x_label.grid(row=6, column=0, columnspan=1, padx=6)
+                self.bar_graph_param_choice_y_label.grid(row=7, column=0, columnspan=1, padx=6)
                 self.bar_graph_param_choice_x.grid(row=6, column=0, columnspan=2, padx=5)
                 self.bar_graph_param_choice_y.grid(row=7, column=0, columnspan=2, padx=5)
                 self.bar_graph_agg_label.grid(row=7, column=1, columnspan=2, padx=5)
@@ -564,27 +575,42 @@ class App:
             # Scatter graph parameter choosing:
             elif choice == "scatter":
                 # label change and geometry
+                self.graph_label.config(text="Scatter plot:")
                 self.master.geometry("520x300")
-                self.graph_label.config(text="Scatter plot:")
                 # forgetting
-                self.graph_label.config(text="Scatter plot:")
+                self.include_label.grid_forget()
+                self.include_median.grid_forget()
+                self.include_mean.grid_forget()
                 self.box_graph_param_choice.grid_forget()
                 self.line_graph_param_choice.grid_forget()
                 self.bar_graph_param_choice_x.grid_forget()
                 self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_param_choice_x_label.grid_forget()
+                self.bar_graph_param_choice_y_label.grid_forget()
+                self.bar_graph_agg_label.grid_forget()
+                self.bar_graph_agg_choice.grid_forget()
+                # setting up
+                
+            
+            # Pie graph parameter choosing:
+            elif choice == "pie":
+                # label change and geometry
+                self.graph_label.config(text="Pie plot:")
+                self.master.geometry("520x300")
+                # forgetting
+                self.include_label.grid_forget()
+                self.include_median.grid_forget()
+                self.include_mean.grid_forget()
+                self.box_graph_param_choice.grid_forget()
+                self.line_graph_param_choice.grid_forget()
+                self.bar_graph_param_choice_x.grid_forget()
+                self.bar_graph_param_choice_y.grid_forget()
+                self.bar_graph_param_choice_x_label.grid_forget()
+                self.bar_graph_param_choice_y_label.grid_forget()
                 self.bar_graph_agg_label.grid_forget()
                 self.bar_graph_agg_choice.grid_forget()
                 # setting up
 
-            # Pie graph parameter choosing:
-            elif choice == "pie":
-                self.graph_label.config(text="Pie plot:")
-                self.box_graph_param_choice.grid_forget()
-                self.line_graph_param_choice.grid_forget()
-                self.bar_graph_param_choice_x.grid_forget()
-                self.bar_graph_param_choice_y.grid_forget()
-                self.bar_graph_agg_label.grid_forget()
-                self.bar_graph_agg_choice.grid_forget()
         # exception for the case when there is no file chosen
         except Exception:
             self.file_label.config(text="* Choose Excel file:")
@@ -592,50 +618,112 @@ class App:
             tk.messagebox.showerror("Error", "Please choose a file first!")
             return
 
-    #Handle missing values in the plotting phase???
+    # Handling the Same choice of parameters in bar plot.
+    def bar_graph_x_selected(self, event):
+        choice = self.bar_graph_param_var_x.get()
+        val = [x for x in self.df.columns if (self.df[x].dtype == "int64" or self.df[x].dtype == "float64") and x != choice]
+        self.bar_graph_param_choice_y.config(values=val)
+    def bar_graph_y_selected(self, event):
+        choice = self.bar_graph_param_var_y.get()
+        val = [x for x in self.df.columns if x != choice]
+        self.bar_graph_param_choice_x.config(values=val)
+
     # Plotting a graph function
     def plot_graph(self):
         # Box plot
         if self.graph_choice.get() == "box":
-            self.df[self.box_graph_param_var.get()].plot(kind="box", vert=False)
-            plt.title(self.box_graph_param_var.get())
-            if self.include_median_var.get() == 1:
-                plt.axvline(self.df[self.box_graph_param_var.get()].median(), color="green", label=f"median({round(self.df[self.line_graph_param_var.get()].median(),2)})")
-                plt.legend(loc="best")
-            if self.include_mean_var.get() == 1:
-                plt.axvline(self.df[self.box_graph_param_var.get()].mean(), color="red", linestyle="-.", label=f"mean({round(self.df[self.line_graph_param_var.get()].mean(),2)})")
-                plt.legend(loc="best")
+            try:
+                plotting_data = self.df[self.box_graph_param_var.get()]
+                plotting_data.plot(kind="box", vert=False)
+                plt.title(self.box_graph_param_var.get())
+                if self.include_median_var.get() == 1:
+                    plt.axvline(plotting_data.median(), color="green", label=f"median({round(plotting_data.median(),2)})")
+                    plt.legend(loc="best")
+                if self.include_mean_var.get() == 1:
+                    plt.axvline(plotting_data.mean(), color="red", linestyle="-.", label=f"mean({round(plotting_data.mean(),2)})")
+                    plt.legend(loc="best")
+            except KeyError:
+                tk.messagebox.showerror("Error", "The column you chose has missing values! Plotting the graph without the NaN rows.")
+                plotting_data = self.df[self.df[self.box_graph_param_var.get()] != np.nan]
+                plotting_data.plot(kind="box", vert=False)
+                plt.title(self.box_graph_param_var.get())
+                if self.include_median_var.get() == 1:
+                    plt.axvline(plotting_data.median(), color="green", label=f"median({round(plotting_data.median(),2)})")
+                    plt.legend(loc="best")
+                if self.include_mean_var.get() == 1:
+                    plt.axvline(plotting_data.mean(), color="red", linestyle="-.", label=f"mean({round(plotting_data.mean(),2)})")
+                    plt.legend(loc="best")
         # Line plot
         elif self.graph_choice.get() == "line":
-            self.df[self.line_graph_param_var.get()].plot(kind="line")
-            plt.title(self.line_graph_param_var.get())
-            if self.include_median_var.get() == 1:
-                plt.axhline(self.df[self.line_graph_param_var.get()].median(), color="green", label=f"median({round(self.df[self.line_graph_param_var.get()].median(),2)})")
-                plt.legend(loc="best")
-            if self.include_mean_var.get() == 1:
-                plt.axhline(self.df[self.line_graph_param_var.get()].mean(), color="red", linestyle="-.", label=f"mean({round(self.df[self.line_graph_param_var.get()].mean(),2)})")
-                plt.legend(loc="best")
+            try:
+                plotting_data = self.df[self.line_graph_param_var.get()]
+                plotting_data.plot(kind="line")
+                plt.title(self.line_graph_param_var.get())
+                if self.include_median_var.get() == 1:
+                    plt.axhline(plotting_data.median(), color="green", label=f"median({round(plotting_data.median(),2)})")
+                    plt.legend(loc="best")
+                if self.include_mean_var.get() == 1:
+                    plt.axhline(plotting_data.mean(), color="red", linestyle="-.", label=f"mean({round(plotting_data.mean(),2)})")
+                    plt.legend(loc="best")
+            except KeyError:
+                tk.messagebox.showerror("Error", "The column you chose has missing values! Plotting the graph without the NaN rows.")
+                plotting_data = self.df[self.df[self.line_graph_param_var.get()] != np.nan]
+                plotting_data.plot(kind="line")
+                plt.title(self.line_graph_param_var.get())
+                if self.include_median_var.get() == 1:
+                    plt.axhline(plotting_data.median(), color="green", label=f"median({round(plotting_data.median(),2)})")
+                    plt.legend(loc="best")
+                if self.include_mean_var.get() == 1:
+                    plt.axhline(plotting_data.mean(), color="red", linestyle="-.", label=f"mean({round(plotting_data.mean(),2)})")
+                    plt.legend(loc="best")
         # Bar plot
         elif self.graph_choice.get() == "bar":
-            agg = self.bar_graph_agg_choice.get()
-            # changing y axis based on the aggregation
-            if agg == "sum":
-                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].sum().plot(kind="bar")
-            elif agg == "mean":
-                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].mean().plot(kind="bar")
-            elif agg == "median":
-                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].median().plot(kind="bar")
-            elif agg == "max":
-                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].max().plot(kind="bar")
-            elif agg == "min":
-                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].min().plot(kind="bar")
-            elif agg == "count":
-                self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].count().plot(kind="bar")
-            else:
-                self.df.plot(kind="bar", x=self.bar_graph_param_choice_x.get(), y=self.bar_graph_param_choice_y.get())
-            plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()}")
+            try:
+                agg = self.bar_graph_agg_choice.get()
+                # changing y axis based on the aggregation
+                if agg == "sum":
+                    self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].sum().plot(kind="bar")
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()} sum")
+                elif agg == "mean":
+                    self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].mean().plot(kind="bar")
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()} mean")
+                elif agg == "median":
+                    self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].median().plot(kind="bar")
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()} median")
+                elif agg == "max":
+                    self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].max().plot(kind="bar")
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()} max")
+                elif agg == "min":
+                    self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].min().plot(kind="bar")
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()} min")
+                elif agg == "count":
+                    self.df.groupby(self.bar_graph_param_choice_x.get())[self.bar_graph_param_choice_y.get()].count().plot(kind="bar")
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()} count")
+                else:
+                    self.df.plot(kind="bar", x=self.bar_graph_param_choice_x.get(), y=self.bar_graph_param_choice_y.get())
+                    plt.title(f"{self.bar_graph_param_choice_x.get()} by {self.bar_graph_param_choice_y.get()}")
+            except KeyError:
+                if self.bar_graph_param_var_x.get() == "":
+                    tk.messagebox.showerror("Error", "You have to choose a column for the x axis!")
+                    self.bar_graph_param_choice_x_label.config(fg="red")
+                elif self.bar_graph_param_var_y.get() == "":
+                    tk.messagebox.showerror("Error", "You have to choose a column for the y axis!")
+                    self.bar_graph_param_choice_y_label.config(fg="red")
+                else:
+                    tk.messagebox.showerror("Error", "The column you chose has missing values! Plotting the graph without the NaN rows.")
+                    self.bar_graph_param_choice_x_label.config(fg="#5ea832")
+                    self.bar_graph_param_choice_y_label.config(fg="#5ea832")
+                    return
         # Scatter plot
-            
+        elif self.graph_choice.get() == "scatter":
+            messagebox.showerror("Error", "The scatter graph plotting logic is still being developed!")
+            return
+
+        # Pie plot
+        elif self.graph_choice.get() == "pie":
+            messagebox.showerror("Error", "The pie graph plotting logic is still being developed!")
+            return 
+
         plt.show()
 
 
