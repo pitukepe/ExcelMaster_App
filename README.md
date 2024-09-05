@@ -18,8 +18,8 @@ Providing a GUI that is simple to navigate and easy to use, this tool is ideal f
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
 - [Launching the File](#launching-the-file)
-- [GUI Usage](#gui-usage)
 - [Contributing](#contributing)
+- [GUI Usage example](#gui-usage-example)
 
 ## Project Structure
 
@@ -98,10 +98,6 @@ chmod +x app.command
 ```
 You can now run the app.command by double tapping on the file.
 
-## GUI Usage
-
-
-
 ## Contributing
 
 We welcome contributions to the Automated Excel Analyzer and Enhancer project! If you'd like to contribute, please follow these steps:
@@ -120,3 +116,65 @@ We welcome contributions to the Automated Excel Analyzer and Enhancer project! I
    git push -u origin YourFeatureName
    ```
 5. Open a pull request.
+
+## GUI Usage example
+### Contents
+- [Starting Page](#starting-page)
+- [Excel Cleaner Page](#excel-cleaner-page)
+- [Excel Pivot table Creator Page](#excel-pivot-table-creator-page)
+- [Excel Graph Plotter Page](#excel-graph-plotter-page)
+- [Excel Formula Applier Page](#excel-formula-applier-page)
+
+#### Starting Page 
+<img width="277" alt="Screenshot 2024-09-05 at 13 50 45" src="https://github.com/user-attachments/assets/920390d0-fd0f-4203-a00b-423a65e03842"></br>
+Here, you can choose the tool you want to use.
+* `Excel Cleaner` - allows the user to clean an Excel table. (remove duplicates / remove empty values)
+* `Excel Pivot Creator` - allows the user to create simple pivot tables, all saved on a new sheet of the original Excel file.
+* `Excel Graph Plotter` - allows the user to plot a simple graph based on the specified columns of an Excel table.
+* `Excel Formula Applier` - allows the user to input and apply Excel formulas. (❗still in the development stage❗)
+
+#### Excel Cleaner Page
+<img width="514" alt="Screenshot 2024-09-05 at 13 51 02" src="https://github.com/user-attachments/assets/3ac3362f-8fb0-46b2-925b-38b06c289fd4"></br>
+Here, you can clean an Excel table by following these steps:
+1. Choose an Excel file by clicking on the `Choose file` button.
+2. If your Excel table has a NUMERICAL index (it gets reset after cleaning), click the check button and then specify it's number like so (e.g. an index in the *first* column would be *1*)</br>
+<img width="575" alt="Screenshot 2024-09-05 at 14 25 39" src="https://github.com/user-attachments/assets/3010549e-b190-4cd1-a173-0a9a657b0183"></br>
+3. Select a preffered output. `.xlsx` for an Excel file, `.csv` for a CSV file, and `.sqlite` for an SQLite database (you can specify an SQLite table name too)
+4. Select a cleaning option. `Drop Duplicates` checkbox drops duplicated rows from the file. `Drop empty rows` checkbox drops rows with empty values (you can further specify `any` for a row with a empty value *anywhere* in the row, or `all` for a row that is completely empty).</br>
+<img width="396" alt="Screenshot 2024-09-05 at 14 33 52" src="https://github.com/user-attachments/assets/95501ec4-1d8b-4b3a-baef-aef43c218374"></br>
+5. Click the `Clean!` button.
+(the cleaned file will be saved at the same directory as the original Excel file, and will have ***_cleaned*** suffix)
+
+#### Excel Pivot table Creator Page
+<img width="515" alt="Screenshot 2024-09-05 at 13 51 49" src="https://github.com/user-attachments/assets/692f2077-2b3f-49be-97ea-fde3fa5e185b"></br>
+Here, you can create a simple pivot table by following these steps:
+1. Choose an Excel file by clicking on the `Choose file` button.
+2. Enter the data sheet name (default - *Sheet1*)
+3. Specify the *pivot index colum name* (the value to be pivotted) and the *pivot values column name* (the value to be aggregated)
+4. Specify the aggregation method for the pivot values column. (options: `sum`(default), `mean`, `max`, `min`, `count`)
+5. Click the `Create Pivot Table` button.
+
+Example of an output:
+Employee type with the sum of salaries for each employee type.</br>
+<img width="169" alt="pivot_example" src="https://github.com/user-attachments/assets/89a0f06c-6b5c-416f-a58c-ef510e1295c6"></br>
+
+#### Excel Graph Plotter Page
+<img width="515" alt="Screenshot 2024-09-05 at 13 52 49" src="https://github.com/user-attachments/assets/6b608818-9a14-4fdd-b80b-841d4fba7a56"></br>
+Here, you can plot simple graphs by following these steps:
+1. Choose an Excel file by clicking on the `Choose file` button.
+2. If your Excel table has a NUMERICAL index (it gets reset after cleaning), click the check button and then specify it's number like so (e.g. an index in the *first* column would be *1*)
+3. Enter the data sheet name (default - *Sheet1*)
+4. Select a Graph Type (options: `box`, `line`, `bar`, `scatter`, `pie`) (❗`scatter` and `pie` yet to be developed❗)</br>
+With each selection, the page will change according to the necessary inputs for the graph plot.
+5. Select values for the graph (for some graphs, `include median` and `include mean` line choices are also available)
+6. Click `Plot!` button.
+
+Examples of the choices available for `box` and `bar` graphs:</br>
+<img width="515" alt="Screenshot 2024-09-05 at 14 01 26" src="https://github.com/user-attachments/assets/d98ec0af-86ce-4146-a634-bf9c1626b231">
+<img width="513" alt="Screenshot 2024-09-05 at 14 01 46" src="https://github.com/user-attachments/assets/c9ed48fe-ed8c-4615-9282-01fd671c8ba6"></br>
+
+Example of a plotted `bar` graph:</br>
+<img width="1194" alt="Screenshot 2024-09-05 at 14 08 27" src="https://github.com/user-attachments/assets/c6585c05-69a0-4155-b058-c4a56b05eeec"></br>
+
+#### Excel Formula Applier Page
+❗Stil being developed❗
