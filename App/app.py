@@ -474,7 +474,7 @@ class App:
         self.bar_y_param_var = tk.StringVar()
         self.bar_y_param_choice = ttk.Combobox(self.master, textvariable=self.bar_y_param_var, state="readonly", values=[None], width=10)
         self.bar_y_param_choice.bind("<<ComboboxSelected>>", self.bar_y_selected)
-        self.bar_agg_label= tk.Label(self.master, text="Agg:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.bar_agg_label= tk.Label(self.master, text="Agg", font=("Times","15"), fg="#5ea832", bg="#0b2838")
         self.bar_agg_var = tk.StringVar()
         self.bar_agg_choice = ttk.Combobox(self.master, textvariable=self.bar_agg_var, state="readonly", values=["none", "sum", "count", "mean", "max", "min", "median"], width=5)
         self.bar_agg_choice.current(0)
@@ -490,10 +490,17 @@ class App:
         self.scatter_corr_check = tk.Checkbutton(self.master, variable=self.scatter_corr_var, text="Include correlation", onvalue=1, offvalue=0, activeforeground="blue", bg="#0b2838")
 
         # Pie graph parameter choosing:
-        self.pie_graph_param_var = tk.StringVar()
-        self.pie_graph_param_choice = ttk.Combobox(self.master, textvariable=self.pie_graph_param_var, state="readonly", values=[None], width=10)
-        
-        
+        self.pie_x_label= tk.Label(self.master, text="X axis:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.pie_x_param_var = tk.StringVar()
+        self.pie_x_param_choice = ttk.Combobox(self.master, textvariable=self.pie_x_param_var, state="readonly", values=[None], width=10)
+        self.pie_y_label= tk.Label(self.master, text="Y axis:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.pie_y_param_var = tk.StringVar()
+        self.pie_y_param_choice = ttk.Combobox(self.master, textvariable=self.pie_y_param_var, state="readonly", values=[None], width=10)
+        self.pie_y_param_choice.bind("<<ComboboxSelected>>", self.pie_y_selected)
+        self.pie_agg_label= tk.Label(self.master, text="Agg", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.pie_agg_var = tk.StringVar()
+        self.pie_agg_choice = ttk.Combobox(self.master, textvariable=self.pie_agg_var, state="readonly", values=["sum", "count", "mean", "max", "min", "median"], width=5)
+    
     # changing the input entrys and buttons according to the graph type
     def graph_type_selected(self, event):
         try:
@@ -531,6 +538,12 @@ class App:
                 self.scatter_x_label.grid_forget()
                 self.scatter_y_label.grid_forget()
                 self.scatter_corr_check.grid_forget()
+                self.pie_x_label.grid_forget()
+                self.pie_y_label.grid_forget()
+                self.pie_agg_label.grid_forget()
+                self.pie_x_param_choice.grid_forget()
+                self.pie_y_param_choice.grid_forget()
+                self.pie_agg_choice.grid_forget()
                 # setting up
                 box_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
                 self.box_graph_param_choice.config(values=box_values)
@@ -558,6 +571,12 @@ class App:
                 self.scatter_x_label.grid_forget()
                 self.scatter_y_label.grid_forget()
                 self.scatter_corr_check.grid_forget()
+                self.pie_x_label.grid_forget()
+                self.pie_y_label.grid_forget()
+                self.pie_agg_label.grid_forget()
+                self.pie_x_param_choice.grid_forget()
+                self.pie_y_param_choice.grid_forget()
+                self.pie_agg_choice.grid_forget()
                 # setting up
                 line_values = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
                 self.line_graph_param_choice.config(values=line_values)
@@ -583,6 +602,12 @@ class App:
                 self.scatter_x_label.grid_forget()
                 self.scatter_y_label.grid_forget()
                 self.scatter_corr_check.grid_forget()
+                self.pie_x_label.grid_forget()
+                self.pie_y_label.grid_forget()
+                self.pie_agg_label.grid_forget()
+                self.pie_x_param_choice.grid_forget()
+                self.pie_y_param_choice.grid_forget()
+                self.pie_agg_choice.grid_forget()
                 # setting up
                 self.bar_values_x = [x for x in self.df.columns]
                 self.bar_values_y = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
@@ -612,6 +637,12 @@ class App:
                 self.bar_y_label.grid_forget()
                 self.bar_agg_label.grid_forget()
                 self.bar_agg_choice.grid_forget()
+                self.pie_x_label.grid_forget()
+                self.pie_y_label.grid_forget()
+                self.pie_agg_label.grid_forget()
+                self.pie_x_param_choice.grid_forget()
+                self.pie_y_param_choice.grid_forget()
+                self.pie_agg_choice.grid_forget()
                 # setting up
                 self.scatter_values_init = [x for x in self.df.columns if self.df[x].dtype == "int64" or self.df[x].dtype == "float64"]
                 self.scatter_x_param_choice.config(values=self.scatter_values_init)
@@ -648,7 +679,16 @@ class App:
                 self.scatter_y_label.grid_forget()
                 self.scatter_corr_check.grid_forget()
                 # setting up
-
+                self.pie_values_init = [x for x in self.df.columns]
+                self.pie_x_param_choice.config(values=self.pie_values_init)
+                self.pie_y_param_choice.config(values=self.pie_values_init)
+                self.pie_x_label.grid(row=6, column=0, columnspan=1, padx=5, sticky="e")
+                self.pie_y_label.grid(row=7, column=0, columnspan=1, padx=5, sticky="e")
+                self.pie_x_param_choice.grid(row=6, column=1, sticky="w")
+                self.pie_y_param_choice.grid(row=7, column=1, sticky="w")
+                self.pie_agg_label.grid(row=7, column=2, sticky="w")
+                self.pie_agg_choice.grid(row=7, column=2, sticky="e")
+                self.graph_plot_button.grid(row=8, column=0, columnspan=3)
         # exception for the case when there is no file chosen
         except Exception:
             if not os.path.exists(self.file.get()):
@@ -670,6 +710,22 @@ class App:
         choice = self.bar_y_param_var.get()
         val = [x for x in self.df.columns if x != choice]
         self.bar_x_param_choice.config(values=val)
+    def pie_y_selected(self, event):
+        if self.df[self.pie_y_param_var.get()].dtype not in ["int64", "float64", "int32", "float32"]:
+            self.pie_agg_choice.config(values=["count"])
+        else:
+            self.pie_agg_choice.config(values=["sum", "count", "mean", "max", "min", "median"])
+    
+    # Toggle the index column function
+    def index_read(self):
+        if self.index_check.get() == 1:
+            self.index_col_label.grid(row=3, column=1,columnspan=2)
+            self.index_col.grid(row=3, column=1,columnspan=2, padx=70, sticky="e")
+            self.index.config(text="(yes)")
+        else:
+            self.index_col_label.grid_forget()
+            self.index_col.grid_forget()
+            self.index.config(text="(no)")
 
     # Plotting a graph function
     def plot_graph(self):
@@ -723,28 +779,8 @@ class App:
         elif self.graph_choice.get() == "bar":
             try:
                 agg = self.bar_agg_choice.get()
-                # changing y axis based on the aggregation
-                if agg == "sum":
-                    self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].sum().plot(kind="bar")
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} sum")
-                elif agg == "mean":
-                    self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].mean().plot(kind="bar")
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} mean")
-                elif agg == "median":
-                    self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].median().plot(kind="bar")
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} median")
-                elif agg == "max":
-                    self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].max().plot(kind="bar")
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} max")
-                elif agg == "min":
-                    self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].min().plot(kind="bar")
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} min")
-                elif agg == "count":
-                    self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].count().plot(kind="bar")
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} count")
-                else:
-                    self.df.plot(kind="bar", x=self.bar_x_param_choice.get(), y=self.bar_y_param_choice.get())
-                    plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()}")
+                self.df.groupby(self.bar_x_param_choice.get())[self.bar_y_param_choice.get()].agg(agg).plot(kind="bar")
+                plt.title(f"{self.bar_x_param_choice.get()} by {self.bar_y_param_choice.get()} {agg}")
             except KeyError:
                 if self.bar_x_param_choice.get() == "":
                     tk.messagebox.showerror("Error", "You have to choose a column for the x axis!")
@@ -752,12 +788,15 @@ class App:
                 elif self.bar_y_param_choice.get() == "":
                     tk.messagebox.showerror("Error", "You have to choose a column for the y axis!")
                     self.bar_y_label.config(fg="red")
+            except AttributeError:
+                tk.messagebox.showerror("Error", "Something went wrong!")
         # Scatter plot
         elif self.graph_choice.get() == "scatter":
             try:
                 if self.scatter_corr_var.get() == 1:
-                    self.df.plot(kind="scatter", x=self.scatter_x_param_choice.get(), y=self.scatter_y_param_choice.get(),)
-                    plt.legend(loc="best", title=f"Correlation: {round(self.df[self.scatter_x_param_choice.get()].corr(self.df[self.scatter_y_param_choice.get()]),2)}")
+                    self.df.plot(kind="scatter", x=self.scatter_x_param_choice.get(), y=self.scatter_y_param_choice.get())
+                    legend_label=[f"Correlation: {round(self.df[self.scatter_x_param_choice.get()].corr(self.df[self.scatter_y_param_choice.get()]),2)}"]
+                    plt.legend(legend_label,loc="best")
                 else:
                     self.df.plot(kind="scatter", x=self.scatter_x_param_choice.get(), y=self.scatter_y_param_choice.get())
                 plt.title(f"{self.scatter_x_param_choice.get()} by {self.scatter_y_param_choice.get()}")
@@ -768,25 +807,21 @@ class App:
                 elif self.scatter_y_param_choice.get() == "":
                     tk.messagebox.showerror("Error", "You have to choose a column for the y axis!")
                     self.scatter_y_label.config(fg="red")
-
         # Pie plot
         elif self.graph_choice.get() == "pie":
-            messagebox.showerror("Error", "The pie graph plotting logic is still being developed!")
-            return 
-
+            try:
+                agg = self.pie_agg_var.get()
+                self.df.groupby(self.pie_x_param_choice.get())[self.pie_y_param_choice.get()].agg(agg).plot(kind="pie")
+                legend_labels = [f"{index}: {round(value,2)}" for index, value in self.df.groupby(self.pie_x_param_choice.get())[self.pie_y_param_choice.get()].agg(agg).items()]
+                plt.title(f"{self.pie_x_param_choice.get()} by {self.pie_y_param_choice.get()} {agg}")
+                plt.legend(legend_labels, loc="best")
+                plt.ylabel("")
+            except Exception:
+                tk.messagebox.showerror("Error", "Something went wrong!")
+                return
         plt.show()
 
-
-    # Toggle the index column function
-    def index_read(self):
-        if self.index_check.get() == 1:
-            self.index_col_label.grid(row=3, column=1,columnspan=2)
-            self.index_col.grid(row=3, column=1,columnspan=2, padx=70, sticky="e")
-            self.index.config(text="(yes)")
-        else:
-            self.index_col_label.grid_forget()
-            self.index_col.grid_forget()
-            self.index.config(text="(no)")
+    ## Formula applier page 
 
 
 #### GUI ####
