@@ -131,7 +131,7 @@ Here, you can choose the tool you want to use.
 * `Excel Cleaner` - allows the user to clean an Excel table. (remove duplicates / remove empty values)
 * `Excel Pivot Creator` - allows the user to create simple pivot tables, all saved on a new sheet of the original Excel file.
 * `Excel Graph Plotter` - allows the user to plot a simple graph based on the specified columns of an Excel table.
-* `Excel Formula Applier` - allows the user to input and apply Excel formulas. (❗still in the development stage❗)
+* `Excel Formula Applier` - allows the user to input and apply Excel formulas. (❗yet to be developed❗)
 
 #### Excel Cleaner Page
 <img width="514" alt="Screenshot 2024-09-05 at 13 51 02" src="https://github.com/user-attachments/assets/3ac3362f-8fb0-46b2-925b-38b06c289fd4"></br>
@@ -164,7 +164,7 @@ Here, you can plot simple graphs by following these steps:
 1. Choose an Excel file by clicking on the `Choose file` button.
 2. If your Excel table has a NUMERICAL index (it gets reset after cleaning), click the check button and then specify it's number like so (e.g. an index in the *first* column would be *1*)
 3. Enter the data sheet name (default - *Sheet1*)
-4. Select a Graph Type (options: `box`, `line`, `bar`, `scatter`, `pie`) (❗`scatter` and `pie` yet to be developed❗)</br>
+4. Select a Graph Type (options: `box`, `line`, `bar`, `scatter`, `pie`) (❗`pie` choice yet to be developed❗)</br>
 With each selection, the page will change according to the necessary inputs for the graph plot.
 5. Select values for the graph (for some graphs, `include median` and `include mean` line choices are also available)
 6. Click `Plot!` button.
@@ -177,4 +177,4 @@ Example of a plotted `bar` graph:</br>
 <img width="1194" alt="Screenshot 2024-09-05 at 14 08 27" src="https://github.com/user-attachments/assets/c6585c05-69a0-4155-b058-c4a56b05eeec"></br>
 
 #### Excel Formula Applier Page
-❗Stil being developed❗
+❗Yet to be developed❗
