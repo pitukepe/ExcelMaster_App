@@ -163,7 +163,7 @@ Here, you can plot simple graphs by following these steps:
 1. Choose an Excel file by clicking on the `Choose file` button.
 2. If your Excel table has a NUMERICAL index (it gets reset after cleaning), click the check button and then specify it's number like so (e.g. an index in the *first* column would be *1*)
 3. Enter the data sheet name (default - *Sheet1*)
-4. Select a Graph Type (options: `box`, `line`, `bar`, `scatter`, `pie`) (❗`pie` choice yet to be developed❗)</br>
+4. Select a Graph Type (options: `box`, `line`, `bar`, `scatter`, `pie`)</br>
 With each selection, the page will change according to the necessary inputs for the graph plot.
 5. Select values for the graph (for some graphs, `include median` and `include mean` line choices are also available)
 6. Click `Plot!` button.
