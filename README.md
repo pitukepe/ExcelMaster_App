@@ -51,7 +51,6 @@ To use the Automated Excel Analyzer and Enhancer, follow these steps:
 
    ```bash
    git clone https://github.com/pitukepe/ExcelMaster_App.git
-   cd App
    ```
    
 2. **Install the Required Dependencies**
