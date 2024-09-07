@@ -4,8 +4,8 @@ import os
 import sqlite3
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-import openpyxl
 from openpyxl import load_workbook
+from openpyxl.drawing.image import Image
 from openpyxl.utils.dataframe import dataframe_to_rows
 import matplotlib.pyplot as plt
 
@@ -45,7 +45,7 @@ class App:
         self.plotter_button.grid(row=4, column=0, padx=10, pady=10)
 
         # Excel formula applier site button
-        self.formula_button = tk.Button(self.master, text="Excel Formula Applier", command = lambda:messagebox.showinfo("Error", "This page is still being developed."), activeforeground="blue", background="#0b2838")
+        self.formula_button = tk.Button(self.master, text="Excel Formula Applier", command = self.formula_page, activeforeground="blue", background="#0b2838")
         self.formula_button.grid(row=5, column=0, padx=10, pady=10)
         
         # Trademark
@@ -413,7 +413,7 @@ class App:
         back_button = tk.Button(self.master, text="<<<", command=self.main_page, cursor="hand2", activeforeground="blue")
         back_button.grid(row=0, column=0, padx=10, sticky="w")
 
-        # Pivot page title
+        # Graph plotter page title
         tk.Label(self.master, text = "Excel Graph Plotter", font=("Times","20"), fg="#5ea832", bg="#0b2838").grid(row=1, column=0, columnspan=3, padx=10, pady=20)
 
         # Choosing an Excel file and reading it into pandas dataframe
@@ -819,10 +819,70 @@ class App:
             except Exception:
                 tk.messagebox.showerror("Error", "Something went wrong!")
                 return
-        plt.show()
+        try:
+            # creating a new sheet for the graph
+            wb = load_workbook(self.file.get())
+            new_sheet = wb.create_sheet("EM Graph")
+
+            #handling os file path
+            original_file_path = self.file.get()
+            directory, filename = os.path.split(original_file_path)
+            # creating a graph folder
+            if not os.path.exists(os.path.join(directory, "Graphs")):
+                os.makedirs(os.path.join(directory, "Graphs"))
+
+            image_filename = f"{os.path.splitext(filename)[0]}_{self.graph_choice.get()}.png"
+            image_file_path = os.path.join(directory, "Graphs", image_filename)
+        
+            plt.savefig(image_file_path, format="png", bbox_inches="tight")
+            messagebox.showinfo("Success", f"Graph saved at {image_file_path} and new sheet in the Excel file.")
+            # saving the graph
+            new_sheet.add_image(Image(image_file_path), anchor="A1")
+            wb.save(self.file.get())
+            wb.close()
+            plt.close()
+        
+        except Exception:
+            tk.messagebox.showerror("Error", "Something went wrong!")
+            plt.close()
+            return
+        
+            
+
+        
+
+
 
     ## Formula applier page 
+    def formula_page(self):
+        # Destroying all widgets from the main page
+        for i in self.master.winfo_children():
+            i.destroy()
+        
+        # Main geometry
+        self.master.geometry("520x240")
+        
+        # Back button
+        back_button = tk.Button(self.master, text="<<<", command=self.main_page, cursor="hand2", activeforeground="blue")
+        back_button.grid(row=0, column=0, padx=10, sticky="w")
 
+        # Fromula applier page title
+        tk.Label(self.master, text = "Excel Formula Applier", font=("Times","20"), fg="#5ea832", bg="#0b2838").grid(row=1, column=1, columnspan=2, pady=20)
+
+        # Choosing an Excel file and reading it into pandas dataframe
+        self.file_label = tk.Label(self.master, text="Choose Excel file:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.file_label.grid(row=2, column=0, padx=5, sticky="w")
+        self.file = tk.Entry(self.master, state="disabled")
+        self.file.grid(row=2, column=1, sticky="w")
+        self.file_button = tk.Button(self.master, text="Choose file", command=self.choose_file, activeforeground="blue", bg="#0b2838")
+        self.file_button.grid(row=2, column=2)
+
+        # Choosing a data sheet
+        self.sheet_label = tk.Label(self.master, text="Data Sheet name:", font=("Times","15"), fg="#5ea832", bg="#0b2838")
+        self.sheet_label.grid(row=3, column=0, padx=5, sticky="w")
+        self.sheet_choice = tk.Entry(self.master, width=10)
+        self.sheet_choice.insert(0, "Sheet1")
+        self.sheet_choice.grid(row=3, column=1, sticky="w")
 
 #### GUI ####
 gui = tk.Tk()
