@@ -24,8 +24,8 @@ Providing a GUI that is simple to navigate and easy to use, this tool is ideal f
 ## Project Structure
 
 ```bash
-App/
-├── app.py                # ExcelMaster app script
+├── App/
+|    └── app.py           # ExcelMaster app script
 ├── requirments.txt       # Python dependencies
 └── README.md
 ```
